@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutor — Ecuaciones Diferenciales Homogéneas</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a18; min-height: 100vh; padding: 1.5rem 1rem; }
+  .container { max-width: 640px; margin: 0 auto; }
+  .header { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e0e0db; }
+  .header h1 { font-size: 20px; font-weight: 500; margin-bottom: 6px; color: #1a1a18; }
+  .header p { font-size: 13px; color: #888780; }
+  .tag-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+  .tag { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: #e6f1fb; color: #185fa5; font-weight: 500; }
+  .progress-bar { height: 4px; background: #e0e0db; border-radius: 4px; margin-bottom: 1.5rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #378add; border-radius: 4px; transition: width 0.4s ease; }
+  .card { background: #fff; border-radius: 12px; border: 1px solid #e0e0db; padding: 1.5rem; margin-bottom: 1rem; }
+  .step-badge { display: inline-block; background: #e6f1fb; color: #185fa5; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin-bottom: 1rem; }
+  .question-text { font-size: 15px; line-height: 1.7; color: #1a1a18; margin-bottom: 0.75rem; }
+  .hint { font-size: 13px; color: #888780; font-style: italic; margin-bottom: 1rem; padding: 8px 12px; background: #f5f5f3; border-radius: 6px; border-left: 3px solid #b5d4f4; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt-btn { background: #f5f5f3; border: 1px solid #d3d1c7; border-radius: 8px; padding: 11px 14px; text-align: left; cursor: pointer; font-size: 14px; color: #1a1a18; line-height: 1.5; transition: all 0.15s; font-family: inherit; }
+  .opt-btn:hover { background: #eef0f0; border-color: #85b7eb; }
+  .opt-btn.correct { background: #eaf3de; border-color: #639922; color: #3b6d11; pointer-events: none; }
+  .opt-btn.wrong { background: #fcebeb; border-color: #e24b4a; color: #a32d2d; pointer-events: none; }
+  .opt-btn.disabled { pointer-events: none; }
+  .feedback { border-radius: 8px; padding: 0.75rem 1rem; font-size: 14px; line-height: 1.6; margin-top: 0.75rem; display: none; }
+  .feedback.ok { background: #eaf3de; color: #3b6d11; border: 1px solid #97c459; }
+  .feedback.fail { background: #fcebeb; color: #a32d2d; border: 1px solid #f09595; }
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; }
+  .score-txt { font-size: 13px; color: #888780; }
+  .btn { background: transparent; border: 1px solid #d3d1c7; border-radius: 8px; padding: 8px 18px; font-size: 14px; cursor: pointer; color: #1a1a18; font-family: inherit; transition: all 0.15s; }
+  .btn:hover { background: #f5f5f3; }
+  .btn.primary { background: #378add; color: #fff; border-color: transparent; }
+  .btn.primary:hover { background: #185fa5; }
+  .graph-area { background: #f5f5f3; border-radius: 8px; padding: 1rem; margin: 1rem 0; border: 1px solid #e0e0db; }
+  .slider-row { display: flex; align-items: center; gap: 10px; margin: 0.6rem 0; }
+  .slider-row label { font-size: 13px; color: #5f5e5a; width: 90px; flex-shrink: 0; }
+  .slider-row input[type=range] { flex: 1; accent-color: #378add; }
+  .slider-val { font-size: 13px; font-weight: 500; color: #185fa5; min-width: 48px; text-align: right; }
+  .graph-meta { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+  .graph-meta span { font-size: 12px; color: #888780; }
+  .graph-meta b { color: #185fa5; }
+  .final-card { text-align: center; padding: 2.5rem 1rem; }
+  .final-score { font-size: 52px; font-weight: 500; color: #185fa5; }
+  .final-msg { font-size: 16px; color: #5f5e5a; margin: 0.5rem 0 0.25rem; }
+  .final-pct { font-size: 13px; color: #888780; margin-bottom: 1.5rem; }
+  .final-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .intro-body { font-size: 15px; color: #5f5e5a; line-height: 1.7; margin: 1rem 0 1.5rem; }
+  .graph-label { font-size: 12px; color: #888780; margin-bottom: 8px; font-weight: 500; }
+  .credit { text-align: center; font-size: 12px; color: #b4b2a9; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e0e0db; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Tutor interactivo</h1>
+    <p>Ecuaciones Diferenciales Homogéneas — Aplicación al diseño vial</p>
+    <div class="tag-row">
+      <span class="tag">Matemática Aplicada</span>
+      <span class="tag">Pensamiento crítico</span>
+      <span class="tag">Caso real: Autopista Perón, Merlo</span>
+    </div>
+  </div>
+  <div id="app"></div>
+  <div class="credit">Grupo 1 — Natacha · Franco · Andrea · 2025</div>
+</div>
+
+<script>
+const steps = [
+  { type:"intro" },
+  {
+    type:"q", badge:"Concepto 1 de 5",
+    q:"Una ecuación diferencial es homogénea cuando puede escribirse como dy/dx = F(y/x). ¿Por qué es importante que la función dependa del cociente y/x y no de y o x por separado?",
+    hint:"Pensá qué pasa si multiplicás x e y por la misma constante t...",
+    opts:[
+      {t:"Porque el cociente y/x siempre da un resultado más fácil de calcular.", ok:false},
+      {t:"Porque si f(tx, ty) = f(x, y), la ecuación no cambia al escalar las variables: describe una relación de proporcionalidad pura.", ok:true},
+      {t:"Porque y/x es siempre menor que 1, lo que simplifica la integración.", ok:false},
+      {t:"Porque al dividir se eliminan las unidades y la ecuación se vuelve adimensional.", ok:false},
+    ],
+    fok:"Exacto. Eso define a una función homogénea: f(tx, ty) = tⁿ · f(x, y). Cuando n = 0 la función solo depende del cociente y/x. En una rampa, eso significa que la pendiente depende de la relación desnivel/distancia, no del punto exacto donde estamos.",
+    ffail:"La clave está en la propiedad de escala: si multiplicás x e y por la misma constante t, el cociente y/x no cambia. La ecuación describe una relación proporcional pura entre las variables."
+  },
+  {
+    type:"q", badge:"Concepto 2 de 5",
+    q:"En el trabajo se usa la sustitución v = y/x. Aplicada a la ecuación de la rampa, obtenemos:\n\nx · dv/dx = tan(α)\n\n¿Qué tipo de ecuación es esta y cómo se resuelve?",
+    hint:"Fijate que x y v están 'separados' en distintos miembros...",
+    opts:[
+      {t:"Es una ecuación lineal; se resuelve con el factor integrante.", ok:false},
+      {t:"Es de variables separables; se pasan dv y dx a lados distintos y se integra.", ok:true},
+      {t:"Es una ecuación de Bernoulli; se resuelve con sustitución de potencias.", ok:false},
+      {t:"Es exacta; se verifica ∂M/∂y = ∂N/∂x y se integra directamente.", ok:false},
+    ],
+    fok:"Correcto. Al separar variables queda dv = tan(α) · dx/x. Integrando: v = tan(α) · ln|x| + C. Por eso aparece el logaritmo en la solución del perfil de la rampa.",
+    ffail:"Después de la sustitución v = y/x la ecuación queda dv = tan(α) · dx/x, donde v y x están separados. Eso es exactamente variables separables: se integra directamente cada lado."
+  },
+  { type:"graph" },
+  {
+    type:"q", badge:"Concepto 3 de 5",
+    q:"En la Gráfica 2 del trabajo, la curva del perfil real siempre está por DEBAJO de la recta g(x) = 0,08x. ¿Qué significa eso para la seguridad vial?",
+    hint:"La recta representa el límite máximo de pendiente admisible según AASHTO (8%)...",
+    opts:[
+      {t:"Que la rampa es demasiado suave y los vehículos podrían perder tracción.", ok:false},
+      {t:"Que el costo de construcción va a ser menor de lo esperado.", ok:false},
+      {t:"Que la pendiente real nunca supera el 8% máximo permitido: el diseño es seguro.", ok:true},
+      {t:"Que la curva parabólica siempre tiene menos área que una recta.", ok:false},
+    ],
+    fok:"Correcto. Si el perfil calculado siempre está por debajo de la recta límite, en ningún punto la pendiente supera el 8% que establece la norma AASHTO para rampas de acceso. El diseño es seguro y confortable.",
+    ffail:"La recta g(x) = 0,08x representa una pendiente constante del 8%: el máximo que permite AASHTO. Si el perfil real está por debajo, la pendiente real es menor en todo el tramo. El diseño cumple la norma."
+  },
+  {
+    type:"q", badge:"Concepto 4 de 5",
+    q:"La solución particular es y(x) = x · (0,0875 · ln(x) − 0,3529). Usamos la condición y(100) = 5. ¿Qué representa físicamente ese punto en la obra real?",
+    hint:"Pensá en qué significa x = 100 m e y = 5 m en el contexto de la rampa...",
+    opts:[
+      {t:"Es el punto donde la pendiente llega a su valor máximo.", ok:false},
+      {t:"Es el punto de conexión con la infraestructura existente: a 100 m del inicio hay 5 m de desnivel acumulado.", ok:true},
+      {t:"Es el centro geométrico de la curva vertical.", ok:false},
+      {t:"Es donde la curvatura cambia de signo (punto de inflexión).", ok:false},
+    ],
+    fok:"Exacto. Las condiciones de contorno anclan la solución matemática a la realidad del proyecto. El punto (100, 5) es una restricción geométrica concreta: a 100 m del inicio la rampa debe tener 5 m de desnivel para empalmar con la infraestructura existente.",
+    ffail:"Las condiciones de contorno conectan la solución matemática con la realidad física. El punto y(100) = 5 significa que a 100 metros del inicio el desnivel acumulado debe ser exactamente 5 metros, para empalmar con algo que ya existe en el terreno."
+  },
+  {
+    type:"q", badge:"Pensamiento crítico — Concepto 5 de 5",
+    q:"El modelo matemático supone terreno uniforme e inclinación que varía de forma continua. ¿Qué limitación real tiene ese supuesto en una obra como la Autopista Presidente Perón?",
+    hint:"No hay una sola respuesta. Pensá en qué factores del mundo real podrían hacer que el modelo no sea perfecto.",
+    opts:[
+      {t:"Ninguna: las ecuaciones diferenciales siempre describen perfectamente la realidad.", ok:false},
+      {t:"El modelo no considera variaciones del subsuelo, factores climáticos ni estructuras previas, lo que puede requerir ajustes en campo.", ok:true},
+      {t:"El modelo falla porque la solución logarítmica crece sin límite y supera cualquier rampa.", ok:false},
+      {t:"El modelo solo funciona si la pendiente inicial es exactamente del 5%.", ok:false},
+    ],
+    fok:"Excelente pensamiento crítico. Todo modelo es una simplificación. En ingeniería vial, la geología del suelo, las lluvias, napas freáticas o edificaciones cercanas pueden obligar a modificar el trazado teórico. Por eso los proyectos combinan el modelo matemático con estudio de suelos, topografía real y relevamiento de campo.",
+    ffail:"Los modelos matemáticos siempre simplifican la realidad. En una autopista real, hay muchos factores que una ecuación diferencial no puede capturar sola: tipo de suelo, clima, edificaciones existentes, presupuesto. Por eso el modelo matemático es el punto de partida, no la palabra final."
+  },
+  { type:"final" }
+];
+
+let cur=0, score=0, ans=[];
+
+function render() {
+  const app = document.getElementById('app');
+  const s = steps[cur];
+
+  if (s.type==="intro") {
+    app.innerHTML=`
+      <div class="card">
+        <p class="intro-body">Este tutor te guía por los conceptos clave del trabajo, con 5 preguntas de comprensión progresiva y una gráfica interactiva donde podés explorar la ecuación del perfil de rampa.</p>
+        <p style="font-size:13px;color:#888780;margin-bottom:1.5rem;">Respondé cada pregunta antes de avanzar. Al final ves tu puntaje y podés repasar los conceptos que necesites.</p>
+        <div class="nav-row">
+          <span class="score-txt">5 preguntas + gráfica interactiva</span>
+          <button class="btn primary" onclick="next()">Comenzar →</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (s.type==="graph") {
+    const pct = Math.round(cur/(steps.length-1)*100);
+    app.innerHTML=`
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="card">
+        <span class="step-badge">Exploración gráfica</span>
+        <p class="question-text">La solución general es y(x) = x · (tan(α) · ln(x) + C). Mové los sliders para ver cómo cambia el perfil de la rampa según el ángulo y la constante de integración.</p>
+        <div class="graph-area">
+          <p class="graph-label">Perfil longitudinal de la rampa</p>
+          <canvas id="gc" width="560" height="190" style="width:100%;height:auto;display:block;"></canvas>
+          <div class="slider-row">
+            <label>Ángulo α</label>
+            <input type="range" id="sa" min="2" max="10" step="0.5" value="5">
+            <span class="slider-val" id="va">5°</span>
+          </div>
+          <div class="slider-row">
+            <label>Constante C</label>
+            <input type="range" id="sc" min="-1" max="0.5" step="0.05" value="-0.35">
+            <span class="slider-val" id="vc">−0.35</span>
+          </div>
+          <div class="graph-meta">
+            <span>y(100) = <b id="y100">—</b> m</span>
+            <span>Pendiente en x=100: <b id="slp">—</b></span>
+          </div>
+        </div>
+        <p style="font-size:13px;color:#888780;">El punto verde es la condición de contorno del caso real: y(100) = 5 m.</p>
+        <div class="nav-row">
+          <span class="score-txt">Puntaje: ${score}/5</span>
+          <button class="btn primary" onclick="next()">Continuar →</button>
+        </div>
+      </div>`;
+    setTimeout(initGraph, 40);
+    return;
+  }
+
+  if (s.type==="final") {
+    const total=5, pct=Math.round(score/total*100);
+    const msg = pct>=80?"Comprensión excelente del tema.":pct>=60?"Buen entendimiento. Repasá los conceptos marcados.":"Recomendamos releer el marco teórico y volver a intentarlo.";
+    app.innerHTML=`
+      <div class="card final-card">
+        <div class="final-score">${score}/${total}</div>
+        <p class="final-msg">${msg}</p>
+        <p class="final-pct">${pct}% de respuestas correctas</p>
+        <div class="final-btns">
+          <button class="btn" onclick="restart()">Reiniciar tutor</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (s.type==="q") {
+    const pct = Math.round(cur/(steps.length-1)*100);
+    const already = ans[cur];
+    app.innerHTML=`
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="card">
+        <span class="step-badge">${s.badge}</span>
+        <p class="question-text">${s.q.replace(/\n/g,'<br>')}</p>
+        <div class="hint">💡 ${s.hint}</div>
+        <div class="options" id="opts">
+          ${s.opts.map((o,i)=>{
+            let cls='opt-btn';
+            if(already!==undefined){cls+=' disabled';if(o.ok)cls+=' correct';else if(i===already&&!o.ok)cls+=' wrong';}
+            return `<button class="${cls}" onclick="pick(${i})">${o.t}</button>`;
+          }).join('')}
+        </div>
+        <div class="feedback ${already!==undefined?(s.opts[already]?.ok?'ok':'fail'):''}" id="fb" style="display:${already!==undefined?'block':'none'}">
+          ${already!==undefined?(s.opts[already]?.ok?s.fok:s.ffail):''}
+        </div>
+        <div class="nav-row">
+          <span class="score-txt">Puntaje: ${score}/5</span>
+          <button class="btn primary" id="nb" style="display:${already!==undefined?'inline-block':'none'}" onclick="next()">Siguiente →</button>
+        </div>
+      </div>`;
+  }
+}
+
+function pick(i) {
+  if(ans[cur]!==undefined)return;
+  const s=steps[cur];
+  const ok=s.opts[i].ok;
+  ans[cur]=i;
+  if(ok)score++;
+  document.querySelectorAll('.opt-btn').forEach((b,idx)=>{
+    b.classList.add('disabled');
+    if(s.opts[idx].ok)b.classList.add('correct');
+    else if(idx===i&&!ok)b.classList.add('wrong');
+  });
+  const fb=document.getElementById('fb');
+  fb.className='feedback '+(ok?'ok':'fail');
+  fb.style.display='block';
+  fb.innerHTML=ok?s.fok:s.ffail;
+  document.getElementById('nb').style.display='inline-block';
+}
+
+function next(){if(cur<steps.length-1){cur++;render();}}
+function restart(){cur=0;score=0;ans=[];render();}
+
+function initGraph(){
+  const canvas=document.getElementById('gc');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const sa=document.getElementById('sa'), sc=document.getElementById('sc');
+  function draw(){
+    const alpha=parseFloat(sa.value), C=parseFloat(sc.value);
+    const tanA=Math.tan(alpha*Math.PI/180);
+    document.getElementById('va').textContent=alpha+'°';
+    document.getElementById('vc').textContent=C.toFixed(2);
+    const W=canvas.width,H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const xMin=1,xMax=220;
+    function yf(x){return x*(tanA*Math.log(x)+C);}
+    let yMin=0,yMax=0;
+    for(let x=xMin;x<=xMax;x+=2){const y=yf(x);if(y<yMin)yMin=y;if(y>yMax)yMax=y;}
+    yMin=Math.min(yMin,-1);yMax=Math.max(yMax,6);
+    function tc(x,y){return{cx:35+(x-xMin)/(xMax-xMin)*(W-50),cy:H-20-(y-yMin)/(yMax-yMin)*(H-35)};}
+    ctx.strokeStyle='rgba(0,0,0,0.07)';ctx.lineWidth=1;
+    [0,50,100,150,200].forEach(x=>{const{cx}=tc(x,0);const{cy:b}=tc(0,yMin);const{cy:t}=tc(0,yMax);ctx.beginPath();ctx.moveTo(cx,b);ctx.lineTo(cx,t);ctx.stroke();});
+    [-2,0,2,5,10,15].forEach(y=>{if(y<yMin||y>yMax)return;const{cy}=tc(0,y);const{cx:l}=tc(xMin,0);const{cx:r}=tc(xMax,0);ctx.beginPath();ctx.moveTo(l,cy);ctx.lineTo(r,cy);ctx.stroke();});
+    ctx.strokeStyle='#378add';ctx.lineWidth=2.5;ctx.beginPath();
+    let started=false;
+    for(let x=xMin;x<=xMax;x+=1){const y=yf(x);const{cx,cy}=tc(x,y);if(!started){ctx.moveTo(cx,cy);started=true;}else ctx.lineTo(cx,cy);}
+    ctx.stroke();
+    const y100=yf(100);const{cx:px,cy:py}=tc(100,y100);
+    ctx.fillStyle='#1D9E75';ctx.beginPath();ctx.arc(px,py,5,0,2*Math.PI);ctx.fill();
+    ctx.fillStyle='#085041';ctx.font='11px sans-serif';ctx.fillText('(100, '+y100.toFixed(1)+')',px+8,py-4);
+    ctx.fillStyle='rgba(90,90,90,0.5)';ctx.font='10px sans-serif';
+    [0,50,100,150,200].forEach(x=>{const{cx,cy}=tc(x,yMin);ctx.fillText(x,cx-6,cy+13);});
+    document.getElementById('y100').textContent=y100.toFixed(2);
+    const slope=tanA*Math.log(100)+C+tanA;
+    document.getElementById('slp').textContent=(slope*100).toFixed(1)+'%';
+  }
+  sa.addEventListener('input',draw);sc.addEventListener('input',draw);draw();
+}
+
+render();
+</script>
+</body>
+</html>
